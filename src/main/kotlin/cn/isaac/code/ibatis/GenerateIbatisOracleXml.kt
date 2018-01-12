@@ -29,55 +29,17 @@ object GenerateIbatisOracleXml {
     <!-- 查询 -->
     ${queryPageList(it)}
 
-	<select id="queryPageCount" parameterClass="java.util.Map" resultClass="int">
-		<![CDATA[
-		select count(*) from TB_STAT_ORDER_DAILY t where 1=1
-		]]>
-		<dynamic>
-			<isNotEmpty prepend="and" property="statDate"> t.STAT_DATE = #statDate#</isNotEmpty>
-			<isNotEmpty prepend="and" property="orderCount"> t.ORDER_COUNT = #orderCount#</isNotEmpty>
-			<isNotEmpty prepend="and" property="orderAmount"> t.ORDER_AMOUNT = #orderAmount#</isNotEmpty>
-			<isNotEmpty prepend="and" property="orderAverage"> t.ORDER_AVERAGE = #orderAverage#</isNotEmpty>
-			<isNotEmpty prepend="and" property="onlineSchools"> t.ONLINE_SCHOOLS = #onlineSchools#</isNotEmpty>
-			<isNotEmpty prepend="and" property="onlineSchoolDay"> t.ONLINE_SCHOOL_DAY = #onlineSchoolDay#</isNotEmpty>
-		</dynamic>
-	</select>
+    <!-- 查询 -->
+	${queryPageCount(it)}
 
 	<!-- 新增 -->
-	<insert id="save" parameterClass="orderDaily">
-		<selectKey resultClass="int" keyProperty="id">
-   			select SEQ_TB_STAT_ORDER_DAILY.nextval from dual
-		</selectKey>
-		insert into TB_STAT_ORDER_DAILY
-		  (ID,STAT_DATE,ORDER_COUNT, ORDER_AMOUNT, ORDER_AVERAGE, ONLINE_SCHOOLS, ONLINE_SCHOOL_DAY)
-		values
-		  (#id#,#statDate#,#orderCount#, #orderAmount#, #orderAverage#, #onlineSchools#, #onlineSchoolDay#)
-	</insert>
+	${save(it)}
 
 	<!-- 修改 -->
-	<update id="update" parameterClass="orderDaily">
-		update TB_STAT_ORDER_DAILY t set t.STAT_DATE = #statDate#
-		<isNotEmpty prepend="," property="orderCount">t.ORDER_COUNT=#orderCount# </isNotEmpty>
-		<isNotEmpty prepend="," property="orderAmount">t.ORDER_AMOUNT=#orderAmount# </isNotEmpty>
-		<isNotEmpty prepend="," property="orderAverage">t.ORDER_AVERAGE=#orderAverage# </isNotEmpty>
-		<isNotEmpty prepend="," property="onlineSchools">t.ONLINE_SCHOOLS=#onlineSchools# </isNotEmpty>
-		<isNotEmpty prepend="," property="onlineSchoolDay">t.ONLINE_SCHOOL_DAY=#onlineSchoolDay# </isNotEmpty>
-		where t.ID = #id#
-	</update>
+	${update(it)}
 
     <!-- 删除 -->
-	<delete id="delete" parameterClass="java.util.Map">
-		delete from tb_salary_detail where 1=1
-		<isNotEmpty prepend="and" property="detailId">
-			detail_id = #detailId#
-		</isNotEmpty>
-		<isNotEmpty prepend="and" property="companyCode">
-			company_code = #companyCode#
-		</isNotEmpty>
-		<isNotEmpty prepend="and" property="batchNo">
-			batch_no = #batchNo#
-		</isNotEmpty>
-	</delete>
+	${delete(it)}
 
 </sqlMap>
 """
@@ -126,11 +88,111 @@ ${getQueryStr()}
 ${getWhereStr()}
 		</dynamic>
 		<![CDATA[
-		order by t.STAT_DATE desc ) t1 ) t2 where t2.rn>=#startRow# and t2.rn<=#endRow#
+		order by t.ID desc ) t1 ) t2 where t2.rn>=#startRow# and t2.rn<=#endRow#
 		]]>
 	 </select>
 """
     }
 
+    fun queryPageCount(table: TableContext): String {
+        fun getWhereStr(): String {
+            var w = ""
+            table.columnsList?.forEachIndexed { index, columnResult ->
+                w += "          <isNotEmpty prepend=\"and\" property=\"${context.getFieldName(columnResult.name)}\"> t.${columnResult.name} = #${context.getFieldName(columnResult.name)}#</isNotEmpty>"
+                if (index != table.columnsList!!.size - 1) {
+                    w += "\n"
+                }
+            }
+            return w
+        }
+
+        return """
+    <select id="queryPageCount" parameterClass="java.util.Map" resultClass="int">
+		select count(*) from ${table.name} t where 1=1
+		<dynamic>
+${getWhereStr()}
+		</dynamic>
+	</select>
+"""
+    }
+
+    fun save(table: TableContext): String {
+        fun getColumns(): Array<String> {
+            var names = "          "
+            var values = "          "
+            var temp = ""
+            table.columnsList?.forEachIndexed { index, columnResult ->
+                names += "${columnResult.name}"
+                values += "#${context.getFieldName(columnResult.name)}#"
+                temp += "#${context.getFieldName(columnResult.name)}#"
+                if (index != table.columnsList!!.size - 1) {
+                    names += ","
+                    values += ","
+                    temp += ","
+
+                    if (temp.trim().length >= 80) {
+                        names += "\n          "
+                        values += "\n          "
+                        temp = ""
+                    }
+                }
+            }
+            return arrayOf(names,values)
+        }
+
+        return """
+    <insert id="save" parameterClass="orderDaily">
+		<selectKey resultClass="int" keyProperty="id">
+   			select SEQ_${table.name.toUpperCase()}.nextval from dual
+		</selectKey>
+		insert into ${table.name} (
+${getColumns()[0]}
+		) values (
+${getColumns()[1]}
+        )
+	</insert>
+"""
+    }
+
+    fun update(table: TableContext): String {
+        fun getWhereStr(): String {
+            var w = ""
+            table.columnsList?.forEachIndexed { index, columnResult ->
+                w += "          <isNotEmpty prepend=\",\" property=\"${context.getFieldName(columnResult.name)}\"> t.${columnResult.name} = #${context.getFieldName(columnResult.name)}#</isNotEmpty>"
+                if (index != table.columnsList!!.size - 1) {
+                    w += "\n"
+                }
+            }
+            return w
+        }
+
+        return """
+    <update id="update" parameterClass="orderDaily">
+		update ${table.name} t set t.STAT_DATE = #statDate#
+${getWhereStr()}
+		where t.ID = #id#
+	</update>
+"""
+    }
+
+    fun delete(table: TableContext): String {
+        fun getWhereStr(): String {
+            var w = ""
+            table.columnsList?.forEachIndexed { index, columnResult ->
+                w += "          <isNotEmpty prepend=\"and\" property=\"${context.getFieldName(columnResult.name)}\"> t.${columnResult.name} = #${context.getFieldName(columnResult.name)}#</isNotEmpty>"
+                if (index != table.columnsList!!.size - 1) {
+                    w += "\n"
+                }
+            }
+            return w
+        }
+
+        return """
+    <delete id="delete" parameterClass="java.util.Map">
+		delete from ${table.name} where 1=1
+${getWhereStr()}
+	</delete>
+"""
+    }
 
 }
