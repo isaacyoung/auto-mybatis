@@ -141,7 +141,7 @@ ${getWhereStr()}
         }
 
         return """
-    <insert id="save" parameterClass="orderDaily">
+    <insert id="save" parameterClass="${context.getShortFieldName(table.name)}">
 		<selectKey resultClass="int" keyProperty="id">
    			select SEQ_${table.name.toUpperCase()}.nextval from dual
 		</selectKey>
@@ -167,7 +167,7 @@ ${getColumns()[1]}
         }
 
         return """
-    <update id="update" parameterClass="orderDaily">
+    <update id="update" parameterClass="${context.getShortFieldName(table.name)}">
 		update ${table.name} t set t.STAT_DATE = #statDate#
 ${getWhereStr()}
 		where t.ID = #id#
@@ -188,7 +188,7 @@ ${getWhereStr()}
         }
 
         return """
-    <delete id="delete" parameterClass="java.util.Map">
+    <delete id="delete" parameterClass="${context.getShortFieldName(table.name)}">
 		delete from ${table.name} where 1=1
 ${getWhereStr()}
 	</delete>

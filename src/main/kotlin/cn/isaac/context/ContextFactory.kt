@@ -4,6 +4,7 @@ import cn.isaac.config.config
 import cn.isaac.config.jdbc
 import cn.isaac.jdbc.ColumnResult
 import cn.isaac.jdbc.OracleConnector2
+import java.io.File
 
 /**
  *
@@ -67,6 +68,26 @@ class ContextFactory {
             result = result.substring(0,1).toUpperCase() + result.substring(1)
         }
         return result
+    }
+
+    fun getComment(title: String?): String {
+        var w = ""
+        w += "    /**\n"
+        w += "     * $title\n"
+        w += "     */\n"
+        return w
+    }
+
+    fun getImports(imports: HashSet<String>): String {
+        var w = ""
+        imports.sorted().forEach {
+            w += "import $it;\n"
+        }
+        return w
+    }
+
+    fun getPathFromPackage(path: String): String {
+        return path.replace(".", File.separator)
     }
 
 }

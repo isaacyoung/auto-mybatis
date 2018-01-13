@@ -1,6 +1,6 @@
 package cn.isaac.code
 
-import cn.isaac.code.ibatis.GenerateIbatisOracleXml
+import cn.isaac.code.ibatis.*
 
 /**
  *
@@ -8,6 +8,11 @@ import cn.isaac.code.ibatis.GenerateIbatisOracleXml
  */
 object Generate {
     fun code() {
+        GeneratePojo.code()
+        GenerateDao.code()
+        GenerateDaoImpl.code()
+        GenerateService.code()
+        GenerateServiceImpl.code()
         GenerateIbatisOracleXml.code()
     }
 }
