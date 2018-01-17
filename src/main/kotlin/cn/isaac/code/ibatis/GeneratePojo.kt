@@ -5,6 +5,7 @@ import cn.isaac.config.out
 import cn.isaac.config.pkg
 import cn.isaac.context.TableContext
 import cn.isaac.context.context
+import cn.isaac.jdbc.ColumnResult
 import java.io.File
 import java.nio.charset.Charset
 
@@ -48,7 +49,7 @@ ${getMethods(it)}
         var w = ""
         table.columnsList?.forEachIndexed { index, columnResult ->
             w += context.getComment(columnResult.comments)
-            w += "    private String ${context.getShortFieldName(columnResult.name)};\n"
+            w += "    private ${context.getFieldClassType(columnResult.dataType,columnResult.dataLength)} ${context.getShortFieldName(columnResult.name)};\n"
         }
         return w
     }
@@ -56,24 +57,24 @@ ${getMethods(it)}
     fun getMethods(table: TableContext): String {
         var w = ""
         table.columnsList?.forEachIndexed { index, columnResult ->
-            w += getGetMethod(columnResult.name)
-            w += getSetMethod(columnResult.name)
+            w += getGetMethod(columnResult)
+            w += getSetMethod(columnResult)
         }
         return w
     }
 
-    private fun getGetMethod(name: String): String {
+    private fun getGetMethod(column: ColumnResult): String {
         var w = ""
-        w += "    public String get${context.getShortClassName(name)}() {\n"
-        w += "        return ${context.getShortFieldName(name)};\n"
+        w += "    public ${context.getFieldClassType(column.dataType,column.dataLength)} get${context.getShortClassName(column.name)}() {\n"
+        w += "        return ${context.getShortFieldName(column.name)};\n"
         w += "    }\n"
         return w
     }
 
-    private fun getSetMethod(name: String): String {
+    private fun getSetMethod(column: ColumnResult): String {
         var w = ""
-        w += "    public void set${context.getShortClassName(name)}(String _${context.getShortFieldName(name)}) {\n"
-        w += "        this.${context.getShortFieldName(name)} = _${context.getShortFieldName(name)};\n"
+        w += "    public void set${context.getShortClassName(column.name)}(${context.getFieldClassType(column.dataType,column.dataLength)} _${context.getShortFieldName(column.name)}) {\n"
+        w += "        this.${context.getShortFieldName(column.name)} = _${context.getShortFieldName(column.name)};\n"
         w += "    }\n"
         return w
     }

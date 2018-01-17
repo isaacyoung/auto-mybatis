@@ -32,7 +32,7 @@ object GenerateIbatisOracleXml {
     <!-- 查询列表 -->
     ${queryList(it)}
 	<!-- 新增 -->
-	${save(it)}
+	${insert(it)}
 	<!-- 修改 -->
 	${update(it)}
     <!-- 删除 -->
@@ -84,7 +84,7 @@ ${getQueryStr()}
 ${getWhereStr()}
 		</dynamic>
 		<![CDATA[
-		order by t.ID desc ) t1 ) t2 where t2.rn>=#startRow# and t2.rn<=#endRow#
+		order by t.${table.primaryKey} desc ) t1 ) t2 where t2.rn>=#startRow# and t2.rn<=#endRow#
 		]]>
 	</select>
 """
@@ -146,7 +146,7 @@ ${getWhereStr()}
 """
     }
 
-    fun save(table: TableContext): String {
+    fun insert(table: TableContext): String {
         fun getColumns(): Array<String> {
             var names = "          "
             var values = "          "
@@ -171,7 +171,7 @@ ${getWhereStr()}
         }
 
         return """<insert id="insert" parameterClass="${context.getShortFieldName(table.name)}">
-		<selectKey resultClass="int" keyProperty="id">
+		<selectKey resultClass="int" keyProperty="${table.primaryKey}">
    			select SEQ_${table.name.toUpperCase()}.nextval from dual
 		</selectKey>
 		insert into ${table.name} (
@@ -187,18 +187,20 @@ ${getColumns()[1]}
         fun getWhereStr(): String {
             var w = ""
             table.columnsList?.forEachIndexed { index, columnResult ->
-                w += "          <isNotEmpty prepend=\",\" property=\"${context.getFieldName(columnResult.name)}\"> t.${columnResult.name} = #${context.getFieldName(columnResult.name)}#</isNotEmpty>"
-                if (index != table.columnsList!!.size - 1) {
-                    w += "\n"
+                if (columnResult.name != table.primaryKey) {
+                    w += "          <isNotEmpty prepend=\",\" property=\"${context.getFieldName(columnResult.name)}\"> t.${columnResult.name} = #${context.getFieldName(columnResult.name)}#</isNotEmpty>"
+                    if (index != table.columnsList!!.size - 1) {
+                        w += "\n"
+                    }
                 }
             }
             return w
         }
 
         return """<update id="update" parameterClass="${context.getShortFieldName(table.name)}">
-		update ${table.name} t set t.STAT_DATE = #statDate#
+		update ${table.name} t set t.${table.primaryKey} = #${context.getShortFieldName(table.primaryKey)}#
 ${getWhereStr()}
-		where t.ID = #id#
+		where t.${table.primaryKey} = #${context.getShortFieldName(table.primaryKey)}#
 	</update>
 """
     }

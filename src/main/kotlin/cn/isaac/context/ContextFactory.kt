@@ -13,7 +13,9 @@ import java.io.File
 
 class TableContext(var name: String,
                    var comments: String?,
-                   var columnsList: List<ColumnResult>?)
+                   var columnsList: List<ColumnResult>?) {
+    var primaryKey: String = ""
+}
 
 class ContextFactory {
     val tables = arrayListOf<TableContext>()
@@ -22,6 +24,10 @@ class ContextFactory {
         val connector = OracleConnector2()
         connector.getTables(config[jdbc.table]).forEach {
             val t = TableContext(it.name,it.comments,connector.getColumns(it.name))
+            t.primaryKey = connector.getPrimaryKey(it.name)
+            if (t.primaryKey == "") {
+                t.primaryKey = t.columnsList!![0].name
+            }
             tables.add(t)
         }
     }
@@ -88,6 +94,14 @@ class ContextFactory {
 
     fun getPathFromPackage(path: String): String {
         return path.replace(".", File.separator)
+    }
+
+    fun getFieldClassType(dataType: String,dataLength: Int): String {
+        return when (dataType) {
+            "VARCHAR2" -> "String"
+            "NUMBER" -> "Integer"
+            else -> "String"
+        }
     }
 
 }
