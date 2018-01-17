@@ -17,6 +17,7 @@ object GenerateServiceImpl {
             val imports = hashSetOf<String>()
             imports.add("java.util.List")
             imports.add("java.util.Map")
+            imports.add("java.util.HashMap")
             imports.add("com.utility.page.Page")
             imports.add("org.springframework.transaction.annotation.Transactional")
             imports.add("${config[pkg.model]}.${context.getShortClassName(it.name)}")
@@ -65,7 +66,7 @@ public class ${context.getShortClassName(it.name)}ServiceImpl implements I${cont
     @Override
     public ServiceResult<Boolean> insert(${context.getShortClassName(it.name)} entry) {
         ServiceResult<Boolean> result = new ServiceResult<Boolean>();
-        ${context.getShortFieldName(it.name)}Dao.add(entry);
+        ${context.getShortFieldName(it.name)}Dao.insert(entry);
         result.setResult(true);
         return result;
     }
@@ -100,15 +101,13 @@ public class ${context.getShortClassName(it.name)}ServiceImpl implements I${cont
     @Override
     public ${context.getShortClassName(it.name)} selectById(Integer id) {
         ServiceResult<${context.getShortClassName(it.name)}> result = new ServiceResult<${context.getShortClassName(it.name)}>();
-        Map<String,Object> map = new HashMap<String,Object>();
+        Map<String,Object> map = new HashMap<>();
         map.put("id",id);
         List<${context.getShortClassName(it.name)}> list = ${context.getShortFieldName(it.name)}Dao.queryList(map);
         if (list != null && list.size() > 0) {
-            result.setResult(list.get(0));
-        } else {
-            result.setResult(null);
+            return list.get(0);
         }
-        return result;
+        return null;
     }
 
     /**
@@ -118,7 +117,7 @@ public class ${context.getShortClassName(it.name)}ServiceImpl implements I${cont
     @Override
     public ServiceResult<Boolean> deleteById(Integer id) {
         ServiceResult<Boolean> result = new ServiceResult<Boolean>();
-        ${context.getShortFieldName(it.name)} entry = new ${context.getShortFieldName(it.name)}();
+        ${context.getShortClassName(it.name)} entry = new ${context.getShortClassName(it.name)}();
         entry.setId(id);
         ${context.getShortFieldName(it.name)}Dao.delete(entry);
         result.setResult(true);
