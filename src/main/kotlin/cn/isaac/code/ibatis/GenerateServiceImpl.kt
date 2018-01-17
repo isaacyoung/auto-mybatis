@@ -15,14 +15,15 @@ object GenerateServiceImpl {
     fun code() {
         context.tables.forEach {
             val imports = hashSetOf<String>()
+            imports.add("java.util.List")
             imports.add("java.util.Map")
             imports.add("com.utility.page.Page")
+            imports.add("org.springframework.transaction.annotation.Transactional")
             imports.add("${config[pkg.model]}.${context.getShortClassName(it.name)}")
             imports.add("com.lianlian.service.ServiceResult")
 
 
-            val str = """
-package ${config[pkg.serv]}.impl;
+            val str = """package ${config[pkg.serv]}.impl;
 
 ${context.getImports(imports)}
 
@@ -48,10 +49,21 @@ public class ${context.getShortClassName(it.name)}ServiceImpl implements I${cont
     }
 
     /**
-     * 新增
+     * 查询列表
      */
     @Override
-    public ServiceResult<Boolean> save(${context.getShortClassName(it.name)} entry) {
+    public ServiceResult<List<${context.getShortClassName(it.name)}>> queryList(Map<String, Object> map) {
+        ServiceResult<List<${context.getShortClassName(it.name)}>> result = new ServiceResult<List<${context.getShortClassName(it.name)}>>();
+        result.setResult(${context.getShortFieldName(it.name)}Dao.queryList(map));
+        return result;
+    }
+
+    /**
+     * 新增
+     */
+    @Transactional
+    @Override
+    public ServiceResult<Boolean> insert(${context.getShortClassName(it.name)} entry) {
         ServiceResult<Boolean> result = new ServiceResult<Boolean>();
         ${context.getShortFieldName(it.name)}Dao.add(entry);
         result.setResult(true);
@@ -61,6 +73,7 @@ public class ${context.getShortClassName(it.name)}ServiceImpl implements I${cont
     /**
      * 更新
      */
+    @Transactional
     @Override
     public ServiceResult<Boolean> update(${context.getShortClassName(it.name)} entry) {
         ServiceResult<Boolean> result = new ServiceResult<Boolean>();
@@ -72,9 +85,41 @@ public class ${context.getShortClassName(it.name)}ServiceImpl implements I${cont
     /**
      * 删除
      */
+    @Transactional
     @Override
     public ServiceResult<Boolean> delete(${context.getShortClassName(it.name)} entry) {
         ServiceResult<Boolean> result = new ServiceResult<Boolean>();
+        ${context.getShortFieldName(it.name)}Dao.delete(entry);
+        result.setResult(true);
+        return result;
+    }
+
+    /**
+     * 单个查询
+     */
+    @Override
+    public ${context.getShortClassName(it.name)} selectById(Integer id) {
+        ServiceResult<${context.getShortClassName(it.name)}> result = new ServiceResult<${context.getShortClassName(it.name)}>();
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("id",id);
+        List<${context.getShortClassName(it.name)}> list = ${context.getShortFieldName(it.name)}Dao.queryList(map);
+        if (list != null && list.size() > 0) {
+            result.setResult(list.get(0));
+        } else {
+            result.setResult(null);
+        }
+        return result;
+    }
+
+    /**
+     * 单个删除
+     */
+    @Transactional
+    @Override
+    public ServiceResult<Boolean> deleteById(Integer id) {
+        ServiceResult<Boolean> result = new ServiceResult<Boolean>();
+        ${context.getShortFieldName(it.name)} entry = new ${context.getShortFieldName(it.name)}();
+        entry.setId(id);
         ${context.getShortFieldName(it.name)}Dao.delete(entry);
         result.setResult(true);
         return result;

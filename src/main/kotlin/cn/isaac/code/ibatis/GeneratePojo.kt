@@ -20,8 +20,7 @@ object GeneratePojo {
             val imports = hashSetOf<String>()
             imports.add("com.lianlian.base.pojo.Entity")
 
-            val str = """
-package ${config[pkg.model]};
+            val str = """package ${config[pkg.model]};
 
 ${context.getImports(imports)}
 
