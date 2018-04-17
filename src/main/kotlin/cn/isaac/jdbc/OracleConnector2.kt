@@ -63,7 +63,12 @@ class OracleConnector2 : Connector {
         var query = queryOf(sql,tableName)
                 .map { row:Row -> row.string("COLUMN_NAME") }
                 .asList
-        return session.run(query)[0]
+        val result = session.run(query)
+        return if (result.isNotEmpty()) {
+            result[0]
+        } else {
+            ""
+        }
     }
 }
 

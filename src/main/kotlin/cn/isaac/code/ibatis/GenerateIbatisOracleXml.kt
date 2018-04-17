@@ -135,6 +135,7 @@ ${getWhereStr()}
         }
 
         return """<select id="queryList" parameterClass="java.util.Map" resultClass="${context.getShortFieldName(table.name)}">
+        <![CDATA[
 		select
 ${getQueryStr()}
 		from ${table.name} t where 1=1
