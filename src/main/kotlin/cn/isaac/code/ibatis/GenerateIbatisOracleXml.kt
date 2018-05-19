@@ -219,7 +219,7 @@ ${getWhereStr()}
         }
 
         return """<delete id="delete" parameterClass="${context.getShortFieldName(table.name)}">
-		delete from ${table.name} where 1=1
+		delete from ${table.name} t where 1=1
 ${getWhereStr()}
 	</delete>
 """
