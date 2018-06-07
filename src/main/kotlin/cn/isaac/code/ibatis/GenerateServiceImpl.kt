@@ -21,6 +21,8 @@ object GenerateServiceImpl {
             imports.add("com.utility.page.Page")
             imports.add("org.springframework.transaction.annotation.Transactional")
             imports.add("${config[pkg.model]}.${context.getShortClassName(it.name)}")
+            imports.add("${config[pkg.dao]}.I${context.getShortClassName(it.name)}Dao")
+            imports.add("${config[pkg.serv]}.I${context.getShortClassName(it.name)}Service")
             imports.add("com.lianlian.service.ServiceResult")
 
 

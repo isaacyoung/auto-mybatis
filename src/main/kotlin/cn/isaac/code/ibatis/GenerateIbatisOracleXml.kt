@@ -172,7 +172,7 @@ ${getWhereStr()}
         }
 
         return """<insert id="insert" parameterClass="${context.getShortFieldName(table.name)}">
-		<selectKey resultClass="int" keyProperty="${table.primaryKey}">
+		<selectKey resultClass="int" keyProperty="${context.getFieldName(table.primaryKey)}">
    			select SEQ_${table.name.toUpperCase()}.nextval from dual
 		</selectKey>
 		insert into ${table.name} (
