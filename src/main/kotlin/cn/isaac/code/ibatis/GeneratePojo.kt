@@ -66,15 +66,15 @@ ${getMethods(it)}
     private fun getGetMethod(column: ColumnResult): String {
         var w = ""
         w += "    public ${context.getFieldClassType(column.dataType,column.dataLength)} get${context.getShortClassName(column.name)}() {\n"
-        w += "        return ${context.getShortFieldName(column.name)};\n"
+        w += "        return this.${context.getShortFieldName(column.name)};\n"
         w += "    }\n"
         return w
     }
 
     private fun getSetMethod(column: ColumnResult): String {
         var w = ""
-        w += "    public void set${context.getShortClassName(column.name)}(${context.getFieldClassType(column.dataType,column.dataLength)} _${context.getShortFieldName(column.name)}) {\n"
-        w += "        this.${context.getShortFieldName(column.name)} = _${context.getShortFieldName(column.name)};\n"
+        w += "    public void set${context.getShortClassName(column.name)}(${context.getFieldClassType(column.dataType,column.dataLength)} ${context.getShortFieldName(column.name)}) {\n"
+        w += "        this.${context.getShortFieldName(column.name)} = ${context.getShortFieldName(column.name)};\n"
         w += "    }\n"
         return w
     }
