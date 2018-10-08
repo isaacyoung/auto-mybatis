@@ -47,7 +47,7 @@ class OracleConnector2 : Connector {
         |FROM USER_TAB_COLUMNS t
         |LEFT JOIN USER_COL_COMMENTS c
         |ON t.TABLE_NAME=c.TABLE_NAME AND t.COLUMN_NAME=c.COLUMN_NAME
-        |WHERE t.TABLE_NAME=?""".trimMargin()
+        |WHERE t.TABLE_NAME=? order by t.COLUMN_ID""".trimMargin()
 
         val columnsQuery = queryOf(sql, tableName).map(toColumn).asList
         return session.run(columnsQuery)
